@@ -39,7 +39,7 @@ export type CodegenResult = {
   render: string,
   staticRenderFns: Array<string>
 };
-
+// 生成渲染文本 ---> 跟vdom相关
 export function generate (
   ast: ASTElement | void,
   options: CompilerOptions
@@ -51,7 +51,7 @@ export function generate (
     staticRenderFns: state.staticRenderFns
   }
 }
-
+// 生成元素或者组件
 export function genElement (el: ASTElement, state: CodegenState): string {
   if (el.parent) {
     el.pre = el.pre || el.parent.pre

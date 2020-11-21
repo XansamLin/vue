@@ -89,7 +89,6 @@ export function addHandler (
       range
     )
   }
-
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.

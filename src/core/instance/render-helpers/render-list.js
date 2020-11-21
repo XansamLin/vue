@@ -5,6 +5,7 @@ import { isObject, isDef, hasSymbol } from 'core/util/index'
 /**
  * Runtime helper for rendering v-for lists.
  */
+// 帮助生成v-for的vnode节点
 export function renderList (
   val: any,
   render: (

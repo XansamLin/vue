@@ -36,12 +36,15 @@ const sharedPropertyDefinition = {
 }
 
 export function proxy (target: Object, sourceKey: string, key: string) {
+  // 在vue实例上代理sourceKey对象上某个属性的get
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
   }
+  // 在vue实例上代理_sourceKey对象上某个属性的set
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  // 在vue实例上定义_data属性上的属性
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
@@ -128,6 +131,7 @@ function initData (vm: Component) {
   const methods = vm.$options.methods
   let i = keys.length
   while (i--) {
+    // 遍历_data里的key值
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
@@ -184,11 +188,12 @@ function initComputed (vm: Component, computed: Object) {
 
     if (!isSSR) {
       // create internal watcher for the computed property.
+      // 为每个计算属性创建一个watchers
       watchers[key] = new Watcher(
         vm,
         getter || noop,
         noop,
-        computedWatcherOptions
+        computedWatcherOptions // { lazy: true }
       )
     }
 
@@ -235,19 +240,28 @@ export function defineComputed (
       )
     }
   }
+  // 定义了计算属性的劫持
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
 function createComputedGetter (key) {
+  // 当获取计算属性的值时，其实是执行computedGetter方法
+  // 该方法会通过闭包存储每个计算属性所对应的watcher
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      // 如果watcher里的value是脏数据，则执行evaluate重新获取值
       if (watcher.dirty) {
         watcher.evaluate()
       }
+      // computed里的get函数如果用到了响应的数据，那么computed将收集到
+      // 与之同样的依赖，当用到了响应的数据被设置新的值，会将computed对应的
+      // watcher的dirty设置为true，当访问computed属性时，会执行
+      // watcher.evaluate()获取最新值，然后将dirty设置为false
       if (Dep.target) {
         watcher.depend()
       }
+      // 返回watcher里的值
       return watcher.value
     }
   }
@@ -341,7 +355,7 @@ export function stateMixin (Vue: Class<Component>) {
 
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
-
+  // 定义vue实例原型对象上的$watch方法
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,

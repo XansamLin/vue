@@ -11,11 +11,12 @@ const seenObjects = new Set()
  * getters, so that every nested property inside the object
  * is collected as a "deep" dependency.
  */
+// 递归遍历对象调用属性的getter方法，以达到对象里的嵌套的属性
+// 被收集为深度的依赖
 export function traverse (val: any) {
   _traverse(val, seenObjects)
   seenObjects.clear()
 }
-
 function _traverse (val: any, seen: SimpleSet) {
   let i, keys
   const isA = Array.isArray(val)

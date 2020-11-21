@@ -22,6 +22,9 @@ let uid = 0
  * A watcher parses an expression, collects dependencies,
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
+ * 每个watcher用于解析表达式，收集依赖，
+ * 并当表达式的值被修改后调用回调函数
+ * watcher同样用于$watch()api和指令
  */
 export default class Watcher {
   vm: Component;
@@ -50,9 +53,11 @@ export default class Watcher {
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
+    // 如果是监控渲染的Watcher，则在vue实例里挂载Watcher的实例
     if (isRenderWatcher) {
       vm._watcher = this
     }
+    // _watchers存储所有的watcher
     vm._watchers.push(this)
     // options
     if (options) {
@@ -60,6 +65,7 @@ export default class Watcher {
       this.user = !!options.user
       this.lazy = !!options.lazy
       this.sync = !!options.sync
+      // options参数里有before属性
       this.before = options.before
     } else {
       this.deep = this.user = this.lazy = this.sync = false
@@ -98,11 +104,13 @@ export default class Watcher {
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
+  // 执行getter函数，重新收集依赖
   get () {
     pushTarget(this)
     let value
     const vm = this.vm
     try {
+      // getter为实例化watcher时传入的第2个参数，这个参数是一个求值函数
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -113,6 +121,7 @@ export default class Watcher {
     } finally {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
+      // 访问对象的每个属性，从而实现深度watch
       if (this.deep) {
         traverse(value)
       }
@@ -124,6 +133,9 @@ export default class Watcher {
 
   /**
    * Add a dependency to this directive.
+   * 收集依赖：往watcher里添加dep，在dep里添加watcher
+   * 可以看出，watcher于dep是多对多关系。一个watcher可能会收集多个dep
+   *  1个dep也可能是多个watcher的依赖
    */
   addDep (dep: Dep) {
     const id = dep.id
@@ -163,6 +175,7 @@ export default class Watcher {
    */
   update () {
     /* istanbul ignore else */
+    // 如果是懒惰的watcher，先标识为脏数据
     if (this.lazy) {
       this.dirty = true
     } else if (this.sync) {
@@ -206,6 +219,7 @@ export default class Watcher {
   /**
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
+   * 这个方法仅用于懒惰watchers调用（computed属性）
    */
   evaluate () {
     this.value = this.get()

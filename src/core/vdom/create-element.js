@@ -1,4 +1,5 @@
 /* @flow */
+// 创建一个元素vnode
 
 import config from '../config'
 import VNode, { createEmptyVNode } from './vnode'
@@ -25,6 +26,7 @@ const ALWAYS_NORMALIZE = 2
 
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
+// 创建一个元素类型的vnode
 export function createElement (
   context: Component,
   tag: any,
@@ -108,6 +110,7 @@ export function _createElement (
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
+    // resolveAsset 查找已经注册的组件
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
       vnode = createComponent(Ctor, data, context, children, tag)
@@ -121,7 +124,7 @@ export function _createElement (
       )
     }
   } else {
-    // direct component options / constructor
+    // direct component options / constructor 传入的tag是一个组件的构造函数
     vnode = createComponent(tag, data, context, children)
   }
   if (Array.isArray(vnode)) {

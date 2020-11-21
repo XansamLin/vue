@@ -25,6 +25,7 @@ let index = 0
 /**
  * Reset the scheduler's state.
  */
+// 重置 调度器 的状态
 function resetSchedulerState () {
   index = queue.length = activatedChildren.length = 0
   has = {}
@@ -87,6 +88,7 @@ function flushSchedulerQueue () {
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
+    // 如果watcher里有before，则先执行before函数，触发beforeUpdate钩子
     if (watcher.before) {
       watcher.before()
     }
@@ -160,6 +162,7 @@ function callActivatedHooks (queue) {
  * Push a watcher into the watcher queue.
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
+ * 将多个watcher推入栈中，在一个任务里相同的watcher会被跳过
  */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
@@ -184,6 +187,7 @@ export function queueWatcher (watcher: Watcher) {
         flushSchedulerQueue()
         return
       }
+      // 执行刷新watcher队列，也就是执行每个watcher的run方法
       nextTick(flushSchedulerQueue)
     }
   }

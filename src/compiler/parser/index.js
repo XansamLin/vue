@@ -76,6 +76,7 @@ export function createASTElement (
 /**
  * Convert HTML string to AST.
  */
+// 将html文本转为AST树
 export function parse (
   template: string,
   options: CompilerOptions
@@ -754,7 +755,7 @@ function processComponent (el) {
     el.inlineTemplate = true
   }
 }
-
+// 解析属性
 function processAttrs (el) {
   const list = el.attrsList
   let i, l, name, rawName, value, modifiers, syncGen, isDynamic

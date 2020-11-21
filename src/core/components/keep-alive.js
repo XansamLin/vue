@@ -53,7 +53,8 @@ const patternTypes: Array<Function> = [String, RegExp, Array]
 export default {
   name: 'keep-alive',
   abstract: true,
-
+  // 在global-api/extend.js里会将prps设置成响应式，所以在lifecile.js里update props
+  // 就会唤醒keep-alive的render函数
   props: {
     include: patternTypes,
     exclude: patternTypes,

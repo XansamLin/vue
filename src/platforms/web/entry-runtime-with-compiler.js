@@ -15,6 +15,10 @@ const idToTemplate = cached(id => {
 })
 
 const mount = Vue.prototype.$mount
+// 在含有模板编译器的版本里，会先调用此$mount，在此方法里执行模板编译
+// 之后再调用src/platforms/web/runtime里的$mount方法去挂载vue实例
+// 如果在vue.单文件中，会通过插件vue-loader将template事先
+// 编译成render函数，然后直接调用src/platforms/web/runtime里的$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -71,7 +75,6 @@ Vue.prototype.$mount = function (
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
-
       /* istanbul ignore if */
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile end')

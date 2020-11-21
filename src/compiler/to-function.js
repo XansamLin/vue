@@ -4,11 +4,14 @@ import { noop, extend } from 'shared/util'
 import { warn as baseWarn, tip } from 'core/util/debug'
 import { generateCodeFrame } from './codeframe'
 
+// 编译器转化为函数结果类型
+// 思考：为什么要经过这一步？
 type CompiledFunctionResult = {
   render: Function;
   staticRenderFns: Array<Function>;
 };
 
+// 创建函数
 function createFunction (code, errors) {
   try {
     return new Function(code)
@@ -18,6 +21,7 @@ function createFunction (code, errors) {
   }
 }
 
+// 创建将编译器转化为函数的函数
 export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 
@@ -49,6 +53,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
+    // 查看是否有此模板的缓存，有则直接返回
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -57,6 +62,13 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // compile
+    // 编译模板
+    // template：模板 options：编译选项
+    // 得到{
+    //  ast,
+    //  render: code.render,
+    //  staticRenderFns: code.staticRenderFns
+    // }
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -88,6 +100,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // turn code into functions
+    // 将代码文本转化为函数
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)

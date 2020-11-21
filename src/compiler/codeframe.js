@@ -1,5 +1,5 @@
 /* @flow */
-
+// 输出指定位置的代码片段，用于在控制台指明出错的代码片段
 const range = 2
 
 export function generateCodeFrame (

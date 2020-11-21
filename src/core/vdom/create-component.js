@@ -33,9 +33,12 @@ import {
 } from 'weex/runtime/recycle-list/render-component-template'
 
 // inline hooks to be invoked on component VNodes during patch
+// 在patch过程中被调用的组件VNodes的hooks
 const componentVNodeHooks = {
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
+      // 如果vnode对应的vue实例存在且这个实例还没被销毁
+      // 且这个实例是被keepAlive
       vnode.componentInstance &&
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
@@ -48,12 +51,14 @@ const componentVNodeHooks = {
         vnode,
         activeInstance
       )
+      // 子组件在这里去将vue实例挂载至vdom中
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
-
+  // 在patch到2个vnode都是组件时候，调用此方法更新当前组件对应vue实例的相关属性
   prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
     const options = vnode.componentOptions
+    // 更新当前组件对应vue实例的相关属性
     const child = vnode.componentInstance = oldVnode.componentInstance
     updateChildComponent(
       child,
@@ -63,7 +68,8 @@ const componentVNodeHooks = {
       options.children // new children
     )
   },
-
+  // 在patch过程中遇到组件vnode，为组件生成vue实例，并在组件vnode对应
+  // 的真实dom节点挂载到真实dom上时，调用此方法。
   insert (vnode: MountedComponentVNode) {
     const { context, componentInstance } = vnode
     if (!componentInstance._isMounted) {
@@ -86,9 +92,12 @@ const componentVNodeHooks = {
 
   destroy (vnode: MountedComponentVNode) {
     const { componentInstance } = vnode
+    // 如果组件还没被销毁
     if (!componentInstance._isDestroyed) {
+      // 判断组件是否被缓存，没有则直接销毁组件对应的vue实例
       if (!vnode.data.keepAlive) {
         componentInstance.$destroy()
+        // 有则让自己和自己的子组件仅仅失活但缓存vue实例
       } else {
         deactivateChildComponent(componentInstance, true /* direct */)
       }
@@ -98,6 +107,7 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+// 创建组件vnode
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -105,6 +115,7 @@ export function createComponent (
   children: ?Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
+  // 如果没有创建vue实例的构造函数，直接返回
   if (isUndef(Ctor)) {
     return
   }
@@ -125,7 +136,7 @@ export function createComponent (
     return
   }
 
-  // async component
+  // async component 异步组件
   let asyncFactory
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
@@ -158,7 +169,7 @@ export function createComponent (
   // extract props
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
-  // functional component
+  // functional component 如果是函数式组件
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
@@ -184,12 +195,12 @@ export function createComponent (
 
   // install component management hooks onto the placeholder node
   installComponentHooks(data)
-
   // return a placeholder vnode
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data, undefined, undefined, undefined, context,
+    // componentOptions，将在实例化vue实例时用到
     { Ctor, propsData, listeners, tag, children },
     asyncFactory
   )
@@ -201,10 +212,9 @@ export function createComponent (
   if (__WEEX__ && isRecyclableComponent(vnode)) {
     return renderRecyclableComponentTemplate(vnode)
   }
-
   return vnode
 }
-
+// 为组件vnode创建一个组件实例
 export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
@@ -215,11 +225,13 @@ export function createComponentInstanceForVnode (
     parent
   }
   // check inline-template render functions
+  // 如果是内联模板的组件，则直接使用其渲染函数
   const inlineTemplate = vnode.data.inlineTemplate
   if (isDef(inlineTemplate)) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // new 一个vue实例
   return new vnode.componentOptions.Ctor(options)
 }
 
