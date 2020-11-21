@@ -3,7 +3,7 @@ const path = require('path')
 const zlib = require('zlib')
 const rollup = require('rollup')
 const terser = require('terser')
-
+// 如果没有dist文件夹，新建一个dist文件夹
 if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
