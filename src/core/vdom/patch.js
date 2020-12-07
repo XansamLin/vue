@@ -49,7 +49,7 @@ function sameVnode (a, b) {
     )
   )
 }
-
+// 是否是相同的数据框
 function sameInputType (a, b) {
   if (a.tag !== 'input') return true
   let i
@@ -430,7 +430,7 @@ export function createPatchFunction (backend) {
       removeNode(vnode.elm)
     }
   }
-
+  // 对比同层的子虚拟dom节点，当且仅当其父虚拟dom节点都含有子树时
   function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly) {
     let oldStartIdx = 0
     let newStartIdx = 0
@@ -463,6 +463,7 @@ export function createPatchFunction (backend) {
         patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
         oldEndVnode = oldCh[--oldEndIdx]
         newEndVnode = newCh[--newEndIdx]
+      // 如果旧的虚拟dom节点开始的节点与新的虚拟dom节点的结束节点相同
       } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
         patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
         canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
@@ -526,7 +527,8 @@ export function createPatchFunction (backend) {
       if (isDef(c) && sameVnode(node, c)) return i
     }
   }
-  // 挂载节点：将dom节点挂载到真实的dom树上
+  // 挂载节点：将dom节点挂载到真实的dom树上，当且仅当新旧节点被判定为相同节点时才调用此函数。
+  // 也就是相同节点才进行打补丁，新旧虚拟dom节点不同，直接用新的dom节点覆盖旧的dom节点就可以了。
   function patchVnode (
     oldVnode,
     vnode,
@@ -535,6 +537,7 @@ export function createPatchFunction (backend) {
     index,
     removeOnly
   ) {
+    // 如果新旧虚拟dom节点是同一个虚拟dom节点，直接返回。
     if (oldVnode === vnode) {
       return
     }
@@ -570,7 +573,7 @@ export function createPatchFunction (backend) {
 
     let i
     const data = vnode.data
-    // 在patch之前，如果当前patch的时组件，则先调用组件的prepatch
+    // 在patch之前，如果当前patch的是组件，则先调用组件的prepatch
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
       i(oldVnode, vnode)
     }
